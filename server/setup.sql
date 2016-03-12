@@ -1,5 +1,8 @@
+CREATE USER 'communalert'@'localhost' IDENTIFIED BY 'communalert';
 CREATE DATABASE communalert;
-CREATE TABLE
+GRANT ALL ON communalert.* TO 'communalert'@'localhost';
+USE communalert;
+CREATE TABLE reports
 (
 report_id int NOT NULL AUTO_INCREMENT,
 user_id int NOT NULL,
