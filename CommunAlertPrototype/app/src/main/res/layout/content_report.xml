@@ -12,8 +12,14 @@
     tools:context="com.example.akalra.communalertprototype.ReportActivity"
     tools:showIn="@layout/activity_report">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Hello World!" />
+
+
+    <Button
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:text="EMERGENCY!"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:onClick="report"/>
+
 </RelativeLayout>
