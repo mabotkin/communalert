@@ -1,16 +1,32 @@
 from flask import Flask, request
 import json
+import math
+import datetime
+import calendar
 import MySQLdb # pip install MySQL-python
 
 USERNAME = "communalert"
 PASSWORD = "communalert"
 
 app = Flask(__name__)
-app.debug = True
+#app.debug = True
+
+def dist(x1,y1,x2,y2):
+	R = 3958.76
+	return R*math.acos(math.sin(y1)*math.sin(y2) + math.cos(y1)*math.cos(y2)*math.cos(x2-x1))
+
+def dpa(x,latitude,longitude):
+	k1 = 1
+	k2 = 1
+	time = datetime.datetime.now() - (x[4]) #timedelta
+	time = time.total_seconds()
+	severity = 1
+	distance = dist(x[2],x[3],latitude,longitude)
+	return (-1)*(k1*math.exp((-1)*k2*time)*(severity/(distance**2)))
 
 @app.route("/")
 def root():
-	return "xD"
+	return "CommunAlert API"
 
 @app.route("/GET", methods=['GET'])
 def get():
@@ -20,12 +36,19 @@ def get():
 	db = MySQLdb.connect("localhost", USERNAME , PASSWORD , "communalert");
 	cursor = db.cursor()
 	cursor.execute("SELECT * FROM reports WHERE report_time > NOW() - INTERVAL 60 MINUTE;")
-	data = cursor.fetchone()
+	data = cursor.fetchall()
+	data = list(data)
 	# sort with lambda = DPA
+	data = sorted(data,key=lambda x:dpa(x,latitude,longitude))
 	# send back json of most relevant
 	# return json.dumps("stuff")
 	db.close()
-	return str(data)
+	newdata = []
+	for i in data:
+		timestamp = calendar.timegm(i[4].utctimetuple())
+		j = (i[0],i[1],i[2],i[3],timestamp,i[5])
+		newdata.append(j)
+	return json.dumps(newdata)
 
 @app.route("/POST",methods=['POST'])
 def post():
@@ -39,7 +62,6 @@ def post():
 	db.commit()
 	db.close()
 	return "success"
-	# sql insert into
 
 if __name__ == "__main__":
     app.run(host="127.0.0.1",port=3500)
